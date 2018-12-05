@@ -5,6 +5,21 @@ var mongoose = require('mongoose');
 
 // Inicializar Variables
 var app = express();
+var bodyParser = require('body-parser');
+
+
+// Body parser
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json())
+
+
+
+// Imortar Rutas
+var appRutes = require('./routes/app');
+var usuarioRutes = require('./routes/usuario');
+var loginRutes = require('./routes/login');
+
 
 
 // Conexion Base de Datos
@@ -18,13 +33,9 @@ var app = express();
 
 
 //Rutas
-app.get('/', (req, res, next) => {
-
-    res.status(200).json({
-        ok:true,
-        mensaje: 'Peticion aceptada correctamente'
-    });
-});
+app.use('/usuario', usuarioRutes);
+app.use('/login', loginRutes);
+app.use('/', appRutes);
 
 
 // Escuchar Peticiones
