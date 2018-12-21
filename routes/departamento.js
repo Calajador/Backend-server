@@ -1,18 +1,14 @@
 var express = require('express');
 
-var bcrypt = require('bcryptjs');
-
 var app = express();
 
-var Usuario = require('../models/usuario');
-
-var jwt = require('jsonwebtoken');
+var Departamento = require('../models/departamento');
 
 var mdAutenticacion = require('../middlewares/autenticacion');
 
 
 // ============================
-// Obtener Todos los usuarios
+// Obtener Todos los departamentos
 // ============================
 
 app.get('/', (req, res, next) => {
@@ -20,37 +16,37 @@ app.get('/', (req, res, next) => {
     var desde = req.query.desde || 0;
     desde = Number(desde);
 
-    Usuario.find({}, 'nombre email img role')
+    Departamento.find({})
     .skip(desde)
     .limit(5)
     .exec(
         
-        (err, usuarios) => {
+        (err, departamentos) => {
 
         if(err) {
             return res.status(500).json({
                 ok:false,
-                mensaje: 'Error cargando usuarios',
+                mensaje: 'Error cargando departamentos',
                 errors: err
             });
         }
 
-        Usuario.count({}, (err,conteo) => {
+        Departamento.count({}, (err, conteo) => {
 
             res.status(200).json({
                 ok:true,
-                usuarios: usuarios,
+                departamentos: departamentos,
                 total: conteo
             });
-        });
+        })
 
-    });
+    })
 
 });
 
 
 // ============================
-// Actualizar usuario
+// Actualizar departamento
 // ============================
 
 app.put('/:id', mdAutenticacion.verificarToken ,(req, res) => {
@@ -58,42 +54,42 @@ app.put('/:id', mdAutenticacion.verificarToken ,(req, res) => {
     var id = req.params.id;
     var body = req.body;
 
-    Usuario.findById(id, (err, usuario) => {
+    Departamento.findById(id, (err, departamento) => {
 
         if(err) {
             return res.status(500).json({
                 ok:false,
-                mensaje: 'Error buscando usuarios',
+                mensaje: 'Error buscando departamentos',
                 errors: err
             });
         }
 
-        if(!usuario) {
+        if(!departamento) {
             return res.status(400).json({
                 ok:false,
-                mensaje: 'El usuario con el id: '+id +'no existe',
-                errors: {message: ' no existe usuario con ese ID'}
+                mensaje: 'El departamento con el id: '+id +'no existe',
+                errors: {message: ' no existe departamento con ese ID'}
             });
         }
 
 
-        usuario.nombre = body.nombre;
-        usuario.email = body.email;
-        usuario.role = body.role;
+        departamento.nombre = body.nombre;
+        // departamento.nombre = req.usuario._id;
+        
 
-        usuario.save( (err, usuarioGuardado) => {
+        departamento.save( (err, departamentoGuardado) => {
 
             if(err) {
                 return res.status(400).json({
                     ok:false,
-                    mensaje: 'Error al actualizar usuario',
+                    mensaje: 'Error al actualizar departamento',
                     errors: err
                 });
             }
 
             res.status(200).json({
                 ok:true,
-                usuario: usuarioGuardado
+                departamento: departamentoGuardado
             });
 
         });
@@ -105,61 +101,65 @@ app.put('/:id', mdAutenticacion.verificarToken ,(req, res) => {
 
 
 // ============================
-// Crear nuevo usuario
+// Crear nuevo departamento
 // ============================
 
-app.post('/', mdAutenticacion.verificarToken ,(req,res) => {
+app.post('/', mdAutenticacion.verificarToken , (req,res) => {
 
     var body = req.body;
 
-    var usuario = new Usuario ({
+    var departamento = new Departamento ({
         nombre: body.nombre,
-        email: body.email,
-        password: bcrypt.hashSync( body.password, 10),
-        img: body.img,
-        role: body.role
+        // usuario: req.usuario._id
     })
 
-    usuario.save( (err, usuarioGuardado) => {
+    departamento.save( (err, departamentoGuardado) => {
 
         if(err) {
             return res.status(500).json({
                 ok:false,
-                mensaje: 'Error creando usuarios',
+                mensaje: 'Error creando departamentos',
                 errors: err
             });
         }
 
         res.status(201).json({
             ok:true,
-            usuario: usuarioGuardado,
-            usuariotoken: req.usuario
+            departamento: departamentoGuardado
         });
     })
 
 })
 
 // ============================
-// Borrar un usuario por el ID
+// Borrar un departamento por el ID
 // ============================
 
 app.delete( '/:id', mdAutenticacion.verificarToken ,(req, res) => {
 
     var id = req.params.id;
 
-    Usuario.findByIdAndRemove( id, ( err, usuarioBorrado ) => {
+    Departamento.findByIdAndRemove( id, ( err, departamentoBorrado ) => {
 
         if(err) {
             return res.status(500).json({
                 ok:false,
-                mensaje: 'Error borrando usuarios',
+                mensaje: 'Error borrando departamentos',
                 errors: err
+            });
+        }
+
+        if(!departamentoBorrado) {
+            return res.status(400).json({
+                ok:false,
+                mensaje: 'No existe departamento con ese id',
+                errors: {message: 'No existe un departamento con ese id'}
             });
         }
 
         res.status(200).json({
             ok:true,
-            usuario: usuarioBorrado
+            departamento: departamentoBorrado
         });
 
     });

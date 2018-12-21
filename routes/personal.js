@@ -1,18 +1,14 @@
 var express = require('express');
 
-var bcrypt = require('bcryptjs');
-
 var app = express();
 
-var Usuario = require('../models/usuario');
-
-var jwt = require('jsonwebtoken');
+var Personal = require('../models/personal');
 
 var mdAutenticacion = require('../middlewares/autenticacion');
 
 
 // ============================
-// Obtener Todos los usuarios
+// Obtener Todos los personals
 // ============================
 
 app.get('/', (req, res, next) => {
@@ -20,37 +16,38 @@ app.get('/', (req, res, next) => {
     var desde = req.query.desde || 0;
     desde = Number(desde);
 
-    Usuario.find({}, 'nombre email img role')
+    Personal.find({})
+    .populate('departamento')
     .skip(desde)
     .limit(5)
     .exec(
         
-        (err, usuarios) => {
+        (err, personals) => {
 
         if(err) {
             return res.status(500).json({
                 ok:false,
-                mensaje: 'Error cargando usuarios',
+                mensaje: 'Error cargando personals',
                 errors: err
             });
         }
 
-        Usuario.count({}, (err,conteo) => {
+        Personal.count({}, (err,conteo) => {
 
             res.status(200).json({
                 ok:true,
-                usuarios: usuarios,
-                total: conteo
+                personals: personals,
+                total:conteo
             });
-        });
+        })
 
-    });
+    })
 
 });
 
 
 // ============================
-// Actualizar usuario
+// Actualizar personal
 // ============================
 
 app.put('/:id', mdAutenticacion.verificarToken ,(req, res) => {
@@ -58,42 +55,43 @@ app.put('/:id', mdAutenticacion.verificarToken ,(req, res) => {
     var id = req.params.id;
     var body = req.body;
 
-    Usuario.findById(id, (err, usuario) => {
+    Personal.findById(id, (err, personal) => {
 
         if(err) {
             return res.status(500).json({
                 ok:false,
-                mensaje: 'Error buscando usuarios',
+                mensaje: 'Error buscando personals',
                 errors: err
             });
         }
 
-        if(!usuario) {
+        if(!personal) {
             return res.status(400).json({
                 ok:false,
-                mensaje: 'El usuario con el id: '+id +'no existe',
-                errors: {message: ' no existe usuario con ese ID'}
+                mensaje: 'El personal con el id: '+id +'no existe',
+                errors: {message: ' no existe personal con ese ID'}
             });
         }
 
 
-        usuario.nombre = body.nombre;
-        usuario.email = body.email;
-        usuario.role = body.role;
+        personal.nombre = body.nombre;
+        // personal.nombre = req.usuario._id;
+        personal.departamento = body.departamento;
+        
 
-        usuario.save( (err, usuarioGuardado) => {
+        personal.save( (err, personalGuardado) => {
 
             if(err) {
                 return res.status(400).json({
                     ok:false,
-                    mensaje: 'Error al actualizar usuario',
+                    mensaje: 'Error al actualizar personal',
                     errors: err
                 });
             }
 
             res.status(200).json({
                 ok:true,
-                usuario: usuarioGuardado
+                personal: personalGuardado
             });
 
         });
@@ -105,61 +103,66 @@ app.put('/:id', mdAutenticacion.verificarToken ,(req, res) => {
 
 
 // ============================
-// Crear nuevo usuario
+// Crear nuevo personal
 // ============================
 
-app.post('/', mdAutenticacion.verificarToken ,(req,res) => {
+app.post('/', mdAutenticacion.verificarToken , (req,res) => {
 
     var body = req.body;
 
-    var usuario = new Usuario ({
+    var personal = new Personal ({
         nombre: body.nombre,
-        email: body.email,
-        password: bcrypt.hashSync( body.password, 10),
-        img: body.img,
-        role: body.role
-    })
+        // usuario: req.usuario._id
+        departamento: body.departamento
+    });
 
-    usuario.save( (err, usuarioGuardado) => {
+    personal.save( (err, personalGuardado) => {
 
         if(err) {
             return res.status(500).json({
                 ok:false,
-                mensaje: 'Error creando usuarios',
+                mensaje: 'Error creando personals',
                 errors: err
             });
         }
 
         res.status(201).json({
             ok:true,
-            usuario: usuarioGuardado,
-            usuariotoken: req.usuario
+            personal: personalGuardado
         });
     })
 
 })
 
 // ============================
-// Borrar un usuario por el ID
+// Borrar un personal por el ID
 // ============================
 
 app.delete( '/:id', mdAutenticacion.verificarToken ,(req, res) => {
 
     var id = req.params.id;
 
-    Usuario.findByIdAndRemove( id, ( err, usuarioBorrado ) => {
+    Personal.findByIdAndRemove( id, ( err, personalBorrado ) => {
 
         if(err) {
             return res.status(500).json({
                 ok:false,
-                mensaje: 'Error borrando usuarios',
+                mensaje: 'Error borrando personals',
                 errors: err
+            });
+        }
+
+        if(!personalBorrado) {
+            return res.status(400).json({
+                ok:false,
+                mensaje: 'No existe personal con ese id',
+                errors: {message: 'No existe un personal con ese id'}
             });
         }
 
         res.status(200).json({
             ok:true,
-            usuario: usuarioBorrado
+            personal: personalBorrado
         });
 
     });

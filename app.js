@@ -19,6 +19,11 @@ app.use(bodyParser.json())
 var appRutes = require('./routes/app');
 var usuarioRutes = require('./routes/usuario');
 var loginRutes = require('./routes/login');
+var departamentoRutes = require('./routes/departamento');
+var personalrutes = require('./routes/personal');
+var busquedaRutes = require('./routes/busqueda');
+var uploadRutes = require('./routes/upload');
+var imagenesRutes = require('./routes/imagenes');
 
 
 
@@ -32,9 +37,22 @@ var loginRutes = require('./routes/login');
  });
 
 
+ // Server index config
+//  var serveIndex = require('serve-index');
+//  app.use(express.static(__dirname + '/'))
+//  app.use('/uploads', serveIndex(__dirname + '/uploads'));
+
+
+
 //Rutas
 app.use('/usuario', usuarioRutes);
+app.use('/departamento', departamentoRutes);
+app.use('/personal', personalrutes);
 app.use('/login', loginRutes);
+app.use('/busqueda', busquedaRutes);
+app.use('/upload', uploadRutes);
+app.use('/img', imagenesRutes);
+
 app.use('/', appRutes);
 
 
