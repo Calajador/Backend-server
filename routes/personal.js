@@ -46,6 +46,47 @@ app.get('/', (req, res, next) => {
 });
 
 
+
+// ============================
+// Ontener un trabajador
+// ============================
+
+app.get('/:id', (req, res) => {
+
+    var id = req.params.id;
+
+    Personal.findById(id)
+        .populate('usuario', 'nombre email img')
+        .populate('departamento')
+        .exec(
+
+            (err, personal) => {
+
+                if(err) {
+                    return res.status(500).json({
+                        ok:false,
+                        mensaje: 'Error buscando trabajador',
+                        errors: err
+                    });
+                }
+        
+                if(!personal) {
+                    return res.status(400).json({
+                        ok:false,
+                        mensaje: 'El personal con el id: '+id +'no existe',
+                        errors: {message: ' no existe personal con ese ID'}
+                    });
+                }
+
+                res.status(200).json({
+                    ok: true,
+                    personal:personal
+                });
+            }
+        )
+});
+
+
 // ============================
 // Actualizar personal
 // ============================

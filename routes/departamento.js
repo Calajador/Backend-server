@@ -132,6 +132,41 @@ app.post('/', mdAutenticacion.verificarToken , (req,res) => {
 })
 
 // ============================
+// Obtener un departamento por el ID
+// ============================
+
+app.get('/:id', (req, res) => {
+
+    var id = req.params.id;
+
+    Departamento.findById(id)
+        .populate('usuario', 'nombre img email')
+        .exec((err, departamento) => {
+
+            if (err) {
+                return res.status(500).json ({
+                    ok:false,
+                    mensaje :'Departamento no encontrado',
+                    errors: err
+                });
+            }
+
+            if (!departamento) {
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'El Departamento con el ID ' + id +' no existe',
+                    errors: {message: 'No existe un Departamento con ese ID'}
+                });
+            }
+
+            res.status(200).json({
+                ok:true,
+                departamento:departamento
+            });
+        })
+})
+
+// ============================
 // Borrar un departamento por el ID
 // ============================
 

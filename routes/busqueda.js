@@ -82,7 +82,9 @@ function buscarDepartamentos(busqueda, regex) {
 
     return new Promise( (resolve,reject) => {
       
-        Departamento.find({ nombre:regex }, (err, departamentos) => {
+        Departamento.find({ nombre:regex })
+            .populate('usuario', 'nombre email img')
+            .exec((err, departamentos) => {
     
             if (err) {
                 reject('error al buscar departamentos', err);
@@ -97,7 +99,10 @@ function buscarPersonal(busqueda, regex) {
 
     return new Promise( (resolve,reject) => {
       
-        Personal.find({ nombre:regex }, (err, personal) => {
+        Personal.find({ nombre:regex })
+        .populate('usuario', 'nombre email img')
+        .populate('departamento')
+        .exec((err, personal) => {
     
             if (err) {
                 reject('error al buscar personal', err);
@@ -112,12 +117,12 @@ function buscarUsuario(busqueda, regex) {
 
     return new Promise( (resolve,reject) => {
       
-        Usuario.find({}, 'nombre email role')
+        Usuario.find({}, 'nombre email role img')
                .or([ {'nombre': regex}, {'email': regex} ])
                .exec( (err, usuarios) => {
 
                 if(err) {
-                    reject('erroro al buscar usuario', err);
+                    reject('error al buscar usuario', err);
                 }else{
                     resolve(usuarios);
                 }

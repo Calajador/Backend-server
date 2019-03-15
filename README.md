@@ -8,5 +8,5 @@ el comando npm install
 
 ## google sing-in
 
-Este pequeño ejercicio sirve para probar la autentificacion
-por google
+Este pequeño ejercicio sirve para obtener el token, y probar la autentificacion
+por google, recordar instalar los modulos de node
